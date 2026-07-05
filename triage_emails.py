@@ -74,7 +74,7 @@ REQUIRED_ENV_VARS = [
 ]
 
 # Optional, sensible defaults so the required-vars list stays exactly at 5.
-SLACK_CHANNEL = os.environ.get("SLACK_CHANNEL", "#inbox-triage")
+SLACK_CHANNEL = "#email_bot"
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.modify"]
