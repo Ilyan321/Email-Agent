@@ -1,28 +1,21 @@
 name: Email Triage Bot
 
-# Cloud Mode entrypoint.
-# Runs the exact same triage_emails.py used locally, but with all five
-# required credentials injected as environment variables sourced from
-# encrypted GitHub Repository Secrets (Settings > Secrets and variables >
-# Actions). No .env file exists on the runner — python-dotenv's load_dotenv()
-# call in the script simply finds nothing and silently no-ops, so the script
-# behaves identically in both modes.
-
 on:
   schedule:
-    # Runs every 15 minutes. Adjust to taste — GitHub's scheduler is
-    # best-effort and may lag slightly during high load periods.
+    # Runs every 15 minutes.
     - cron: "*/15 * * * *"
-  workflow_dispatch: {}   # allows manual "Run workflow" triggering from the Actions tab
+  workflow_dispatch: {}   # Allows manual triggering from the Actions tab
 
 concurrency:
   group: email-triage-bot
-  cancel-in-progress: false   # never kill a run that's mid-triage
+  cancel-in-progress: false   # Never kill a run that's mid-triage
 
 jobs:
   triage:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # INCREASE TIMEOUT: Prevents GitHub from killing the script if it takes 
+    # a while to gracefully handle Groq rate-limit retries on large email batches.
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -44,6 +37,5 @@ jobs:
           GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
           GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
           GMAIL_REFRESH_TOKEN: ${{ secrets.GMAIL_REFRESH_TOKEN }}
-          # Optional, non-secret overrides can live in repo Variables instead of Secrets:
           SLACK_CHANNEL: ${{ vars.SLACK_CHANNEL }}
         run: python triage_emails.py
